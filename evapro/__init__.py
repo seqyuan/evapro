@@ -1,9 +1,9 @@
 """Evapro - Automated add projects to annoeva Workflow Monitoring System
 """
 
-from .scripts.evaproject import main
+from evapro.scripts.evaproject import main
 
-__version__ = "0.1.3"
+__version__ = "0.1.4"
 __author__ = "Zan Yuan <yfinddream@gmail.com>"
 __license__ = "MIT"
 

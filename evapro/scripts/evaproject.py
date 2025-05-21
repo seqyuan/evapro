@@ -8,10 +8,9 @@ import os
 import warnings
 from typing import Optional
 from pathlib import Path
-
+import importlib.resources
 import click
 from evapro.db.database import SQLiteDB 
-
 from evapro.db.update_db import lims2evaproDB, add_project2annoeva
 from evapro.config import (
     cronlist,
@@ -63,11 +62,10 @@ def cron_cli() -> None:
 def conf_cli() -> None:
     """check config file
     """
-    confpath = importlib.resources.path("evapro.config", "evapro.yaml")
-    print(f"配置文件路径: {confpath}")
+    with importlib.resources.path("evapro.config", "evapro.yaml") as confpath:
+        print(f"配置文件路径: {str(confpath)}")
 
 
 # ------------------------------------------------------------------------------------
 if __name__ == '__main__':
     main()
-
