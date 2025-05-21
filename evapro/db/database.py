@@ -1,8 +1,8 @@
 import os
 import sqlite3
+import getpass
 from dataclasses import dataclass, field
-from typing import Optional
-from pandas import read_sql, Series, DataFrame
+from pandas import read_sql, DataFrame
 
 @dataclass
 class SQLiteDB:
@@ -33,7 +33,7 @@ class SQLiteDB:
         #self.conn.execute('PRAGMA journal_mode=WAL')  # 启用写入日志模式
         self.cur = self.conn.cursor()
 
-    def crt_tb_sql(self) -> None:  # 确保该方法可被外部调用
+    def crt_tb_sql(self) -> None:
         """Create the projects table in the database if it doesn't exist.
 
         The table contains the following columns:
@@ -84,7 +84,7 @@ class SQLiteDB:
             print(f"创建 projects 数据库表失败: {str(e)}")
             raise
 
-    def crt_allpro_tb_sql(self) -> None:  # 确保该方法可被外部调用
+    def crt_allpro_tb_sql(self) -> None:
         """Create the all_ana_projects table in the database if it doesn't exist.
 
         The table contains the following columns:
@@ -95,7 +95,7 @@ class SQLiteDB:
         ptype: project product type
         isautoflow: is flow line product type, [Y|N]
         workdir: workdir path
-        isadd2annoeva:  is add to annoeva monitor, [Y|N]
+        isadd2annoeva: is add to annoeva monitor, [Y|N]
         """
         crt_allpro_tb_sql_c = """
         create table if not exists all_ana_projects(
@@ -105,7 +105,8 @@ class SQLiteDB:
         ptype text,
         isautoflow text,
         workdir text,
-        isadd2annoeva text"""
+        isadd2annoeva text
+        );"""
 
         try:
             self.cur.execute(crt_allpro_tb_sql_c)
@@ -122,15 +123,19 @@ class SQLiteDB:
             proid (str): Project ID
             ptype (str): Project type
         """
-        #import getpass
-        #username = getpass.getuser()
-
-        insert_sql = "insert into projects (user, proid, ptype, isautoflow, workdir, dirstat, info, data, autoconf, pstat, run_num) values (?,?,?,?,?,?,?,?,?,?)"
-        self.cur.execute(insert_sql, (user, proid, ptype, '-', 'N', 'N', 'N', 'N', '-', 0))
+        insert_sql = "insert into projects (user, proid, ptype, workdir, dirstat, info, data, autoconf, pstat, run_num) values (?,?,?,?,?,?,?,?,?,?)"
+        self.cur.execute(insert_sql, (user, proid, ptype, '', 'N', 'N', 'N', 'N', '-', 0))
         self.conn.commit()
 
     def insert_allpro_tb_sql(self, user: str, proid: str, ptype: str, isautoflow: str, workdir: str) -> None:
         """Insert a new all_ana_projects record into the database.
+        
+        Args:
+            user (str): User name
+            proid (str): Project ID
+            ptype (str): Project type
+            isautoflow (str): Is auto flow [Y|N]
+            workdir (str): Work directory path
         """
         insert_sql = "insert into all_ana_projects (user, proid, ptype, isautoflow, workdir, isadd2annoeva) values (?,?,?,?,?,?)"
         self.cur.execute(insert_sql, (user, proid, ptype, isautoflow, workdir, 'N'))
@@ -143,8 +148,9 @@ class SQLiteDB:
             proid (str): Project ID to update
             name (str): Field name to update
             value (str): New value to set
+            table (str): Table name (default: "projects")
         """
-        update_sql = f"update \'{table}\' set \'{name}\'=\'{value}\' where proid=\'{proid}\'"
+        update_sql = f"update '{table}' set '{name}'='{value}' where proid='{proid}'"
         self.cur.execute(update_sql)
         self.conn.commit()
 

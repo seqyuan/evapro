@@ -5,7 +5,7 @@ from pathlib import Path
 import os
 from pathlib import Path
 import yaml
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 def get_evapro_path() -> str:
     try:
