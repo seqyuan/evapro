@@ -77,18 +77,17 @@ def set_dbpath(syncdbdir: str) -> None:
     """Set syncdbpath.db path
     """
     confpath = importlib.resources.path("evapro.config", "evapro.yaml")
-    content = f'syncproject: {syncdbdir}/syncproject.db'
-
+    
     try:
         with confpath as default_config:
             conf = _get_yaml_data(default_config)
             # 初始化autoconf节点如果不存在
-            conf['syncproject'] = content
+            conf['syncproject'] = f'{syncdbdir}/syncproject.db'
             # 保存修改后的配置
             with open(default_config, 'w', encoding='utf-8') as f:
                 yaml.safe_dump(conf, f, allow_unicode=True, sort_keys=False)
             
-            print(f'请修改配置文件中的lims数据库配置\n{confpath}')
+            print(f'请修改配置文件中的lims数据库配置\n{str(confpath)}')
             #return Path(default_confi
     except PermissionError as e:
         print(f"权限不足无法修改配置文件: {e.filename}")

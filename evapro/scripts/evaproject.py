@@ -42,6 +42,25 @@ def init_cli(syncdbdir: str) -> None:
     tbj.crt_allpro_tb_sql()
     tbj.close_db()
 
+    try:
+        # 设置数据库文件权限
+        db_file = Path(f'{syncdbdir}/syncproject.db')
+        db_file.chmod(0o777)
+        
+        # 设置目录权限
+        db_dir = Path(syncdbdir)
+        db_dir.chmod(0o777)
+        
+        click.echo(f"成功设置 {db_file} 和 {db_dir} 权限为 777")
+    except FileNotFoundError:
+        click.echo(f"错误: 目录 {syncdbdir} 不存在，请检查路径")
+    except PermissionError:
+        click.echo(f"错误: 没有权限修改 {syncdbdir} 或 {db_file} 的权限，请手动修改为777权限")
+    except Exception as e:
+        click.echo(f"设置权限时发生错误: {str(e)}")
+    
+    
+
 # ------------------------------------------------------------------------------------
 @main.command(name="lims2evapro")
 def lims2eva_cli() -> None:
