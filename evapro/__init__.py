@@ -3,7 +3,7 @@
 
 from evapro.scripts.evaproject import main
 
-__version__ = "0.1.4"
+__version__ = "0.1.5"
 __author__ = "Zan Yuan <yfinddream@gmail.com>"
 __license__ = "MIT"
 

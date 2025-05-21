@@ -26,16 +26,18 @@ class cronlist(object):
         self.program = get_evapro_path()
 
     def add_cron(self):
-        conf = _get_yaml_data(importlib.resources.path("evapro.config", "evapro.yaml"))
-        import socket
-        if 'cronnode' not in conf:
-            conf['cronnode'] = socket.gethostname()
-            with open(confpath, 'w', encoding='utf-8') as f:
-                yaml.safe_dump(conf, f, allow_unicode=True, sort_keys=False)
-        else:
-            if conf['cronnode'] != socket.gethostname():
-                print(f"当前主机名与配置文件中的主机名不匹配: {socket.gethostname()} != {conf['cronnode']}\n请更换节点")
-                return
+        confpath = importlib.resources.path("evapro.config", "evapro.yaml")
+        with confpath as default_config:
+            conf = _get_yaml_data(default_config)
+            import socket
+            if 'cronnode' not in conf:
+                conf['cronnode'] = socket.gethostname()
+                with open(default_config, 'w', encoding='utf-8') as f:
+                    yaml.safe_dump(conf, f, allow_unicode=True, sort_keys=False)
+            else:
+                if conf['cronnode'] != socket.gethostname():
+                    print(f"当前主机名与配置文件中的主机名不匹配: {socket.gethostname()} != {conf['cronnode']}\n请更换节点")
+                    return
 
         p = subprocess.Popen('crontab -l', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdoutput, _ = p.communicate()
@@ -62,13 +64,14 @@ def get_dbpath() -> Path:
     """
     confpath = importlib.resources.path("evapro.config", "evapro.yaml")
     if os.path.isfile(confpath):
-        conf = _get_yaml_data(confpath)
-        if 'syncproject' in conf:
-            if os.path.isfile(conf['syncproject']):
-                return conf['syncproject']
-            else:
-                print(f"指定的数据库路径不存在: {confpath}")
-                return None
+        with confpath as default_config:
+            conf = _get_yaml_data(default_config)
+            if 'syncproject' in conf:
+                if os.path.isfile(conf['syncproject']):
+                    return conf['syncproject']
+                else:
+                    print(f"指定的数据库路径不存在: {confpath}")
+                    return None
 
 def set_dbpath(syncdbdir: str) -> None:
     """Set syncdbpath.db path
@@ -77,14 +80,15 @@ def set_dbpath(syncdbdir: str) -> None:
     content = f'syncproject: {syncdbdir}/syncproject.db'
 
     try:
-        conf = _get_yaml_data(confpath)
-        # 初始化autoconf节点如果不存在
-        conf['syncproject'] = content
-        # 保存修改后的配置
-        with open(confpath, 'w', encoding='utf-8') as f:
-            yaml.safe_dump(conf, f, allow_unicode=True, sort_keys=False)
-        
-        print(f'请修改配置文件中的lims数据库配置\n{confpath}')
+        with confpath as default_config:
+            conf = _get_yaml_data(default_config)
+            # 初始化autoconf节点如果不存在
+            conf['syncproject'] = content
+            # 保存修改后的配置
+            with open(default_config, 'w', encoding='utf-8') as f:
+                yaml.safe_dump(conf, f, allow_unicode=True, sort_keys=False)
+            
+            print(f'请修改配置文件中的lims数据库配置\n{confpath}')
             #return Path(default_confi
     except PermissionError as e:
         print(f"权限不足无法修改配置文件: {e.filename}")

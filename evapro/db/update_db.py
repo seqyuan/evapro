@@ -77,7 +77,9 @@ def lims2evaproDB() -> None:
     """Sync data from LIMS to evapro database"""
     try:
         confpath = importlib.resources.path("evapro.config", "evapro.yaml")
-        conf = _get_yaml_data(confpath)
+        with confpath as default_config:
+            conf = _get_yaml_data(default_config)
+
         pre_syn_time = conf['syn_lims_time']
         now = datetime.datetime.now()
         now_str = now.strftime('%Y-%m-%d %H:%M:%S')
@@ -99,9 +101,10 @@ def lims2evaproDB() -> None:
         path_df = path_df[path_df['SUB_PROJECT_ID'].isin(df_ana_pro['project_code'])]
         df_ana_pro['workdir'] = path_df.loc[df_ana_pro['project_code'], "PATHWAY"].to_list()
 
-        annoeva_conf = _get_yaml_data(conf['annoevaconf'])
-        autoflow_products = annoeva_conf['autoconf'].keys()
+        with conf['annoevaconf'] as annoevaconf:
+            annoeva_conf = _get_yaml_data(annoevaconf)
 
+        autoflow_products = annoeva_conf['autoconf'].keys()
         tbj = SQLiteDB(dbpath=f"{conf['syncproject']}/syncproject.db")
 
         for i, row in df_ana_pro.iterrows():
@@ -128,7 +131,8 @@ def add_project2annoeva() -> None:
     """Add projects to annoeva monitoring system"""
     try:
         confpath = importlib.resources.path("evapro.config", "evapro.yaml")
-        conf = _get_yaml_data(confpath)
+        with confpath as default_config:
+            conf = _get_yaml_data(default_config)
         pro_tbj = SQLiteDB(dbpath=f"{conf['syncproject']}/syncproject.db")
         
         user = getpass.getuser()
