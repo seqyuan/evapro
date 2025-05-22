@@ -81,19 +81,21 @@ def update_project_workdir() -> None:
         conf = _get_yaml_data(default_config)
         
     tbj = SQLiteDB(dbpath=f"{conf['syncproject']}")
-    query = "SELECT proid FROM all_ana_projects WHERE ? = ?"
-    df = read_sql(query, con=tbj.conn, params=('workdir', ''))
-    
+    query = "SELECT proid FROM all_ana_projects WHERE workdir = ''"
+    df = read_sql(query, con=tbj.conn)
+    if df.shape[0] == 0:
+        tbj.close_db()
+        return
+
     conn = pymysql.connect(**conf['cloud_message_info'])
-    cursor = conn.cursor()
     query = f"""SELECT SUB_PROJECT_ID, PATHWAY FROM project_online_backup_info WHERE PATHWAY != '' AND SUB_PROJECT_ID IN ({','.join([f"'{item}'" for item in df['proid']])})"""
     path_df = read_sql(query, conn)
     
     for i, row in path_df.iterrows():
         try:
             update_sql = f"update all_ana_projects set workdir ='{row['PATHWAY']}' where proid='{row['SUB_PROJECT_ID']}'"
-            cursor.execute(update_sql)
-            conn.commit()
+            tbj.cur.execute(update_sql)
+            tbj.conn.commit()
         except Exception as e:
             print(f"Error updating workdir for project {row['SUB_PROJECT_ID']}: {e}")
             continue
