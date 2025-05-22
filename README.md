@@ -87,7 +87,7 @@ lims3_db:
 1. 执行 `crontab -e` 打开crontab任务列表
 2. 添加以下内容到新的一行(注意修改为实际的程序路径):
 ```
-0 4 * * * /seqyuan/miniconda3/envs/annoeva/bin/evapro cron
+0 3 * * * /seqyuan/miniconda3/envs/annoeva/bin/evapro cron
 ``` 
 3. 保存退出(`:wq`)
 

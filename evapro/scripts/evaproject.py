@@ -11,7 +11,8 @@ from pathlib import Path
 import importlib.resources
 import click
 from evapro.db.database import SQLiteDB 
-from evapro.db.update_db import lims2evaproDB, add_project2annoeva
+    
+from evapro.db.update_db import lims2evaproDB, update_project_workdir, add_project2annoeva
 from evapro.config import (
     cronlist,
     set_dbpath
@@ -68,6 +69,7 @@ def lims2eva_cli() -> None:
     需要加入管理账户的计划任务，每4h执行一次
     """
     lims2evaproDB()
+    update_project_workdir()
 
 # ------------------------------------------------------------------------------------
 @main.command(name="cron")

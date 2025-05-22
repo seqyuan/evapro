@@ -75,6 +75,28 @@ def product_type(CONN):
     df.columns = ['PRODUCT']
     return df
 
+def update_project_workdir() -> None:
+    confpath = importlib.resources.path("evapro.config", "evapro.yaml")
+    with confpath as default_config:
+        conf = _get_yaml_data(default_config)
+        
+    tbj = SQLiteDB(dbpath=f"{conf['syncproject']}")
+    query = "SELECT proid FROM all_ana_projects WHERE ? = ?"
+    df = read_sql(query, con=tbj.conn, params=('workdir', ''))
+    
+    conn = pymysql.connect(**conf['cloud_message_info'])
+    path_df = read_sql('SELECT SUB_PROJECT_ID, PATHWAY FROM project_online_backup_info', con=conn)
+    path_df = path_df.drop_duplicates('SUB_PROJECT_ID')
+
+    for i, row in path_df.iterrows():
+        try:
+            tbj.update_tb_value_sql(row['SUB_PROJECT_ID'], 'workdir', path_df.loc[row['SUB_PROJECT_ID'], 'PATHWAY'])
+        except Exception as e:
+            print(f"Error updating workdir for project {row['SUB_PROJECT_ID']}: {e}")
+            continue
+    tbj.close_db()
+    conn.close()
+
 def lims2evaproDB() -> None:
     """Sync data from LIMS to evapro database"""
     try:
@@ -86,7 +108,7 @@ def lims2evaproDB() -> None:
         now = datetime.datetime.now()
         now_str = now.strftime('%Y-%m-%d %H:%M:%S')
 
-        one_week_ago = now - timedelta(weeks=1)
+        one_week_ago = now - timedelta(weeks=6)
         one_week_ago_str = one_week_ago.strftime("%Y-%m-%d %H:%M:%S")
 
         conn = pymysql.connect(**conf['cloud_message_info'])
@@ -94,6 +116,12 @@ def lims2evaproDB() -> None:
 
         df_ana_pro = get_analysis_project(conn_bill, pre_syn_time)
         pid_name = product_type(conn)
+        
+        # ---
+        not_add_ana_df = df_ana_pro[df_ana_pro['product_ID'].isin(pid_name.index)==False]
+        not_add_ana_df.to_csv("~/not_add_ana_df.tsv", sep="\t")
+        # ---
+        
         df_ana_pro['PRODUCT'] = pid_name.loc[df_ana_pro['product_ID'], "PRODUCT"].to_list()
         df_ana_pro['workdir'] = ''
 
@@ -101,7 +129,11 @@ def lims2evaproDB() -> None:
         path_df.index = path_df['SUB_PROJECT_ID']
         path_df = path_df.drop_duplicates('SUB_PROJECT_ID')
         path_df = path_df[path_df['SUB_PROJECT_ID'].isin(df_ana_pro['project_code'])]
-        df_ana_pro['workdir'] = path_df.loc[df_ana_pro['project_code'], "PATHWAY"].to_list()
+
+        # ---
+        have_workdir_df = df_ana_pro[df_ana_pro['project_code'].isin(path_df['SUB_PROJECT_ID'])]
+        df_ana_pro.loc[have_workdir_df.index, 'workdir'] = path_df.loc[have_workdir_df['project_code'], "PATHWAY"].to_list()
+        # ---
 
         annoeva_conf = _get_yaml_data(conf['annoevaconf'])
         autoflow_products = annoeva_conf['autoconf'].keys()
