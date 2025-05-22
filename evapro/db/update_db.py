@@ -38,6 +38,8 @@ def get_analysis_project(connection, create_date):
     """
     query = """
         SELECT 
+            create_date,
+            info_date,
             project_code, 
             product_parent_id, 
             product_id,
@@ -110,7 +112,7 @@ def lims2evaproDB() -> None:
         for i, row in df_ana_pro.iterrows():
             try:
                 isautoflow = 'Y' if row['PRODUCT'] in autoflow_products else 'N'
-                tbj.insert_allpro_tb_sql(row['info_user_id'], row['project_code'], row['PRODUCT'], isautoflow, row['workdir'])
+                tbj.insert_allpro_tb_sql(row['info_user_id'], row['project_code'], row['create_date'], row['info_date'], row['PRODUCT'], isautoflow, row['workdir'],)
             except Exception as e:
                 print(f"Error inserting project {row['project_code']}: {e}")
                 continue

@@ -102,6 +102,8 @@ class SQLiteDB:
         id integer primary key autoincrement unique not null,
         user text,
         proid text unique not null,
+        create_date text,
+        info_date text,
         ptype text,
         isautoflow text,
         workdir text,
@@ -127,18 +129,21 @@ class SQLiteDB:
         self.cur.execute(insert_sql, (user, proid, ptype, '', 'N', 'N', 'N', 'N', '-', 0))
         self.conn.commit()
 
-    def insert_allpro_tb_sql(self, user: str, proid: str, ptype: str, isautoflow: str, workdir: str) -> None:
+    def insert_allpro_tb_sql(self, user: str, proid: str, create_date: str, info_date: str, ptype: str, isautoflow: str, workdir: str) -> None:
         """Insert a new all_ana_projects record into the database.
         
         Args:
             user (str): User name
             proid (str): Project ID
+            create_date (str): Creation date
+            info_date (str): Info date
             ptype (str): Project type
             isautoflow (str): Is auto flow [Y|N]
             workdir (str): Work directory path
+            
         """
-        insert_sql = "insert into all_ana_projects (user, proid, ptype, isautoflow, workdir, isadd2annoeva) values (?,?,?,?,?,?)"
-        self.cur.execute(insert_sql, (user, proid, ptype, isautoflow, workdir, 'N'))
+        insert_sql = "insert into all_ana_projects (user, proid, create_date, info_date, ptype, isautoflow, workdir, isadd2annoeva) values (?,?,?,?,?,?,?,?)"
+        self.cur.execute(insert_sql, (user, proid, create_date, info_date, ptype, isautoflow, workdir, 'N'))
         self.conn.commit()
 
     def update_tb_value_sql(self, proid: str, name: str, value: str, table: str="projects") -> None:
