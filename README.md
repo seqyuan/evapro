@@ -45,7 +45,7 @@ syncproject: /path/syncproject.db
 cronnode: bj-sci-login
 # 把项目从lims数据库同步到syncproject.db计划任务的执行节点，这是为了防止多节点执行造成的冲突
 syn_lims_time: 2025-05-21 13:56:35
-# 上次从lims同步项目的时间，下次会从这个时间之后同步项目
+# 上次从lims同步项目的时间，下次会同步这个时间之后创建的项目
 annoevaconf: /seqyuan/miniconda3/envs/annoeva/lib/python3.11/site-packages/annoeva/config/evaconf.yaml
 # annoeva的配置文件，这个文件记录的产品类型的项目才会被evapro自动加入到annoeva流水线监控
 annoeva:  /seqyuan/miniconda3/envs/annoeva/bin/annoeva
