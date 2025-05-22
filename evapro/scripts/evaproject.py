@@ -25,7 +25,7 @@ def main() -> None:
     This serves as the entry point for all subcommands.
     """
     crnlist = cronlist()
-    #crnlist.add_cron()
+    crnlist.add_cron()
 
 # ------------------------------------------------------------------------------------
 @main.command(name="init")

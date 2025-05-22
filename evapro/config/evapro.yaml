@@ -4,7 +4,7 @@ syn_lims_time: 2025-05-21 13:56:35
 annoevaconf: /seqyuan/anaconda3/envs/annoeva/lib/python3.11/site-packages/annoeva/config/evaconf.yaml
 annoeva: /seqyuan/miniconda3/envs/annoeva/bin/annoeva
 
-cloud_message_info_db:
+cloud_message_info:
   host: mysql.rds.aliyuncs.com
   port: 3307
   user: 
@@ -12,7 +12,7 @@ cloud_message_info_db:
   db: cloud_message_info
   charset: utf8
 
-lims3_db:
+lims3:
   host: mysql.rds.aliyuncs.com
   port: 3307
   user: 

@@ -5,7 +5,7 @@ import importlib.resources
 import yaml
 import subprocess
 import getpass
-from pandas import read_sql
+from pandas import read_sql, DataFrame
 from evapro.db import SQLiteDB
 
 def _get_yaml_data(yaml_file: str) -> dict:
@@ -59,11 +59,11 @@ def get_analysis_project(connection, create_date):
         return df
     except Exception as e:
         print(f"查询出错: {e}")
-        return pd.DataFrame()
+        return DataFrame()
 
 def product_type(CONN):
     """Get product id and name from lims"""
-    df = pd.read_sql('SELECT PRODUCT_LIMS_ID, introduction FROM project_online_product_type', con=CONN)
+    df = read_sql('SELECT PRODUCT_LIMS_ID, introduction FROM project_online_product_type', con=CONN)
     df = df[df['PRODUCT_LIMS_ID'] != ""]
     df["PRODUCT_LIMS_ID"] = df["PRODUCT_LIMS_ID"].str.split(",")
     df = df.explode("PRODUCT_LIMS_ID")
@@ -97,22 +97,22 @@ def lims2evaproDB() -> None:
         df_ana_pro['PRODUCT'] = pid_name.loc[df_ana_pro['product_ID'], "PRODUCT"].to_list()
         df_ana_pro['workdir'] = ''
 
-        path_df = pd.read_sql('SELECT SUB_PROJECT_ID, PATHWAY FROM project_online_backup_info where MISSION_END_DATE>"2025-04-01"', con=conn)
+        path_df = read_sql('SELECT SUB_PROJECT_ID, PATHWAY FROM project_online_backup_info where MISSION_END_DATE>"2025-04-01"', con=conn)
         path_df.index = path_df['SUB_PROJECT_ID']
         path_df = path_df.drop_duplicates('SUB_PROJECT_ID')
         path_df = path_df[path_df['SUB_PROJECT_ID'].isin(df_ana_pro['project_code'])]
         df_ana_pro['workdir'] = path_df.loc[df_ana_pro['project_code'], "PATHWAY"].to_list()
 
-        with conf['annoevaconf'] as annoevaconf:
-            annoeva_conf = _get_yaml_data(annoevaconf)
-
+        annoeva_conf = _get_yaml_data(conf['annoevaconf'])
         autoflow_products = annoeva_conf['autoconf'].keys()
-        tbj = SQLiteDB(dbpath=f"{conf['syncproject']}/syncproject.db")
+        tbj = SQLiteDB(dbpath=f"{conf['syncproject']}")
 
         for i, row in df_ana_pro.iterrows():
+            create_date = row['create_date'].strftime('%Y-%m-%d %H:%M:%S')
+            info_date = row['info_date'].strftime('%Y-%m-%d %H:%M:%S')
             try:
                 isautoflow = 'Y' if row['PRODUCT'] in autoflow_products else 'N'
-                tbj.insert_allpro_tb_sql(row['info_user_id'], row['project_code'], row['create_date'], row['info_date'], row['PRODUCT'], isautoflow, row['workdir'],)
+                tbj.insert_allpro_tb_sql(row['info_user_id'], row['project_code'], create_date, info_date, row['PRODUCT'], isautoflow, row['workdir'],)
             except Exception as e:
                 print(f"Error inserting project {row['project_code']}: {e}")
                 continue
@@ -122,7 +122,7 @@ def lims2evaproDB() -> None:
         conn_bill.close()
 
         conf['syn_lims_time'] = now_str
-        with open(confpath, 'w', encoding='utf-8') as f:
+        with open(default_config, 'w', encoding='utf-8') as f:
             yaml.safe_dump(conf, f, allow_unicode=True, sort_keys=False)
 
     except Exception as e:
@@ -135,7 +135,7 @@ def add_project2annoeva() -> None:
         confpath = importlib.resources.path("evapro.config", "evapro.yaml")
         with confpath as default_config:
             conf = _get_yaml_data(default_config)
-        pro_tbj = SQLiteDB(dbpath=f"{conf['syncproject']}/syncproject.db")
+        pro_tbj = SQLiteDB(dbpath=f"{conf['syncproject']}")
         
         user = getpass.getuser()
         query = """
@@ -146,11 +146,11 @@ def add_project2annoeva() -> None:
             FROM 
                 all_ana_projects 
             WHERE 
-                user = %s 
+                `user` = ?
                 AND isadd2annoeva = 'N' 
-                AND workdir != ''
+                AND workdir != ?
         """
-        df = read_sql(query, con=pro_tbj.conn, params=(user,))
+        df = read_sql(query, con=pro_tbj.conn, params=(user, ''))
         for i, row in df.iterrows():
             try:
                 cmd = f"{conf['annoeva']} addproject -p {row['proid']} -t {row['ptype']} -d {row['workdir']}"
