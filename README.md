@@ -4,6 +4,7 @@
 ```bash
 pip install evapro
 ```
+安装成功后会在conda环境的bin下生成evapro主程序，可在命令行直接使用该程序，例如 /seqyuan/Miniconda3/envs/annoeva/bin/evapro
 
 ## 命令列表
 
@@ -24,7 +25,10 @@ evapro init -d /path/to/dbdir
 3. 设置数据库文件和目录权限为 777
 
 ### 查看修改配置文件路径
-初始化完成后，需要手动修改evapro的配置文件，以使其能够正确访问lims数据库和正确访问annoeva程序及其配置文件。
+初始化完成后，需要手动修改evapro的配置文件，以使其能够正确访问:
+- lims数据库
+- annoeva程序
+- annoeva配置文件
 
 ```bash
 evapro conf
@@ -69,7 +73,7 @@ lims3_db:
 `这个命令是为程序管理员准备`
 
 ```bash
-evapro lims2evapro
+/path/evapro lims2evapro
 ```
 
 **功能**:
@@ -91,7 +95,7 @@ evapro lims2evapro
 `这个命令需要项目负责人执行`
 
 ```bash
-evapro cron
+/path/evapro cron
 ```
 
 **功能**:
@@ -107,4 +111,4 @@ evapro cron
 **重要提示**:
 1. 初始化时需要确保对指定目录有写入权限
 2. 同步 LIMS 数据需要正确配置数据库连接信息
-3. 自动设置 777 权限可能需要管理员权限
+3. 自动设置 777 权限需要目录的属主执行evapro程序
