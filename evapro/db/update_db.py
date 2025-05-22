@@ -85,9 +85,12 @@ def update_project_workdir() -> None:
     df = read_sql(query, con=tbj.conn, params=('workdir', ''))
     
     conn = pymysql.connect(**conf['cloud_message_info'])
-    path_df = read_sql('SELECT SUB_PROJECT_ID, PATHWAY FROM project_online_backup_info', con=conn)
-    path_df = path_df.drop_duplicates('SUB_PROJECT_ID')
-
+    query = f"""
+    SELECT SUB_PROJECT_ID, PATHWAY FROM project_online_backup_info
+    WHERE SUB_PROJECT_ID IN ({','.join([f"'{item}'" for item in df['proid']])})
+    """
+    path_df = pd.read_sql(query, conn)
+    
     for i, row in path_df.iterrows():
         try:
             tbj.update_tb_value_sql(row['SUB_PROJECT_ID'], 'workdir', path_df.loc[row['SUB_PROJECT_ID'], 'PATHWAY'])
@@ -122,6 +125,7 @@ def lims2evaproDB() -> None:
         not_add_ana_df.to_csv("~/not_add_ana_df.tsv", sep="\t")
         # ---
         
+        df_ana_pro = df_ana_pro[df_ana_pro['product_ID'].isin(pid_name.index)==True]
         df_ana_pro['PRODUCT'] = pid_name.loc[df_ana_pro['product_ID'], "PRODUCT"].to_list()
         df_ana_pro['workdir'] = ''
 
