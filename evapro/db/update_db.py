@@ -101,6 +101,33 @@ def update_project_workdir() -> None:
             continue
     tbj.close_db()
     conn.close()
+    
+def update_project_user() -> None:
+    confpath = importlib.resources.path("evapro.config", "evapro.yaml")
+    with confpath as default_config:
+        conf = _get_yaml_data(default_config)
+        
+    tbj = SQLiteDB(dbpath=f"{conf['syncproject']}")
+    query = "SELECT proid FROM all_ana_projects WHERE user = ''"
+    df = read_sql(query, con=tbj.conn)
+    if df.shape[0] == 0:
+        tbj.close_db()
+        return
+
+    conn = pymysql.connect(**conf['lims3'])
+    query = f"""SELECT project_code, info_user_id FROM tb_info_sequence_bill WHERE info_user_id != '' AND project_code IN ({','.join([f"'{item}'" for item in df['proid']])})"""
+    path_df = read_sql(query, conn)
+    
+    for i, row in path_df.iterrows():
+        try:
+            update_sql = f"update all_ana_projects set user ='{row['info_user_id']}' where proid='{row['project_code']}'"
+            tbj.cur.execute(update_sql)
+            tbj.conn.commit()
+        except Exception as e:
+            print(f"Error updating user for project {row['project_code']}: {e}")
+            continue
+    tbj.close_db()
+    conn.close()
 
 def lims2evaproDB() -> None:
     """Sync data from LIMS to evapro database"""

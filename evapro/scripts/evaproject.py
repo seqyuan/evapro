@@ -12,7 +12,7 @@ import importlib.resources
 import click
 from evapro.db.database import SQLiteDB 
     
-from evapro.db.update_db import lims2evaproDB, update_project_workdir, add_project2annoeva
+from evapro.db.update_db import lims2evaproDB, update_project_workdir, update_project_user, add_project2annoeva
 from evapro.config import (
     cronlist,
     set_dbpath
@@ -70,6 +70,7 @@ def lims2eva_cli() -> None:
     """
     lims2evaproDB()
     update_project_workdir()
+    update_project_user()
 
 # ------------------------------------------------------------------------------------
 @main.command(name="cron")
