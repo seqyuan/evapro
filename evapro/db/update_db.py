@@ -85,15 +85,15 @@ def update_project_workdir() -> None:
     df = read_sql(query, con=tbj.conn, params=('workdir', ''))
     
     conn = pymysql.connect(**conf['cloud_message_info'])
-    query = f"""
-    SELECT SUB_PROJECT_ID, PATHWAY FROM project_online_backup_info
-    WHERE SUB_PROJECT_ID IN ({','.join([f"'{item}'" for item in df['proid']])})
-    """
-    path_df = pd.read_sql(query, conn)
+    cursor = conn.cursor()
+    query = f"""SELECT SUB_PROJECT_ID, PATHWAY FROM project_online_backup_info WHERE PATHWAY != '' AND SUB_PROJECT_ID IN ({','.join([f"'{item}'" for item in df['proid']])})"""
+    path_df = read_sql(query, conn)
     
     for i, row in path_df.iterrows():
         try:
-            tbj.update_tb_value_sql(row['SUB_PROJECT_ID'], 'workdir', path_df.loc[row['SUB_PROJECT_ID'], 'PATHWAY'])
+            update_sql = f"update all_ana_projects set workdir ='{row['PATHWAY']}' where proid='{row['SUB_PROJECT_ID']}'"
+            cursor.execute(update_sql)
+            conn.commit()
         except Exception as e:
             print(f"Error updating workdir for project {row['SUB_PROJECT_ID']}: {e}")
             continue
