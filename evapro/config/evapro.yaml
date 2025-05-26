@@ -19,3 +19,18 @@ lims3:
   passwd: 
   db: lims3
   charset: utf8
+
+ADuser:
+  yuanzan: zanyuan
+  renxue: xueren
+  limeng: mengli
+  hanshaohuai: shaohuaihan
+  lixiaobo: xiaoboli
+  quanhui: huiquan
+  suyalei: yaleisu
+  shiyuzhi: yuzhishi
+  tuchengfang: chengfangtu
+  wangxia: wangxia
+  yaojiaying: jiayingyao
+  zhangxuemei02: xuemeizhang02
+

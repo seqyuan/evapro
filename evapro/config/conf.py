@@ -48,7 +48,7 @@ class cronlist(object):
                 need_addcron = 0
         if need_addcron == 1:
             #run cron project per 2 hours
-            line = f'0 */2 * * * {self.program} cron'
+            line = f'0 */3 * * * {self.program} cron'
             crontable.append(line)
 
             pipe = os.popen('crontab', 'w')
@@ -88,6 +88,7 @@ def set_dbpath(syncdbdir: str) -> None:
                 yaml.safe_dump(conf, f, allow_unicode=True, sort_keys=False)
             
             print(f'请修改配置文件中的lims数据库配置\n{str(confpath)}')
+            ###########
             #return Path(default_confi
     except PermissionError as e:
         print(f"权限不足无法修改配置文件: {e.filename}")
