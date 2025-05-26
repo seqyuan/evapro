@@ -226,13 +226,12 @@ def add_project2annoeva() -> None:
                 p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 stdo, stde = p.communicate()  
                 
+                pro_tbj.update_tb_value_sql(row['proid'], 'isadd2annoeva', 'Y', table='all_ana_projects')
                 # webhook 提醒
             except Exception as e:
                 print(f"Error adding project {row['proid']}: {str(stde,'utf-8')}")
                 continue
             
-            pro_tbj.update_tb_value_sql(row['proid'], 'isadd2annoeva', 'Y', table='all_ana_projects')
-
         pro_tbj.close_db()
     except Exception as e:
         print(f"Error in add_project2annoeva: {e}")
