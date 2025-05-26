@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "evapro"
-version = "1.2.6"
+version = "1.2.8"
 
 description = "遍历lims数据库，把新下的lims任务单添加到anneva监控"
 authors = ["Yuan Zan <yfinddream@gmail.com>"]

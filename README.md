@@ -67,6 +67,13 @@ lims3_db:
   passwd:
   db: lims3
   charset: utf8
+
+# 有一些用户的服务器账号和lims数据库记录的生信分析人域控账号不一致，导致不能识别到自己的项目，这项配置记录了服务器账号和域控的对应关系
+# 管理员可更新此配置
+ADuser:
+  yuanzan: zanyuan
+  renxue: xueren
+  limeng: mengli
 ```
 
 ### 同步 LIMS 数据
