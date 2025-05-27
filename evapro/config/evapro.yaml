@@ -1,8 +1,8 @@
 syncproject: ~/syncproject.db
 cronnode: bj-sci-login
 syn_lims_time: 2025-05-21 13:56:35
-annoevaconf: /seqyuan/anaconda3/envs/annoeva/lib/python3.11/site-packages/annoeva/config/evaconf.yaml
-annoeva: /seqyuan/miniconda3/envs/annoeva/bin/annoeva
+annoevaconf: /seqyuan/Miniconda/envs/annoeva/lib/python3.11/site-packages/annoeva/config/evaconf.yaml
+annoeva: /seqyuan/Miniconda/envs/annoeva/bin/annoeva
 
 cloud_message_info:
   host: mysql.rds.aliyuncs.com
