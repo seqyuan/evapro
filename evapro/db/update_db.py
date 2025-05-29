@@ -24,7 +24,7 @@ def _get_yaml_data(yaml_file: str) -> dict:
     with open(yaml_file, "r", encoding="utf-8") as file:
         return yaml.safe_load(file)
 
-def get_analysis_project(connection, create_date):
+def get_analysis_project(connection, now_date):
     """
     获取用户的分析项目数据
     
@@ -48,12 +48,12 @@ def get_analysis_project(connection, create_date):
         FROM 
             tb_info_sequence_bill 
         WHERE 
-            create_date > %s 
+            info_date > %s 
             AND ANALYSIS_TYPE = 1
     """
     
     try:
-        df = read_sql(query, con=connection, params=(create_date,))
+        df = read_sql(query, con=connection, params=(now_date,))
         df['product_ID'] = df['product_parent_id'].astype(str) + "-" + df['product_id'].astype(str)
         df.drop(['product_parent_id', 'product_id'], axis=1, inplace=True)
         return df
